@@ -37,6 +37,7 @@ def index():
     label_loss_adam = loss_adam['index'].values
     value_loss_adam = loss_adam['loss'].values
     value_val_adam = loss_adam['val_loss'].values
+
     return render_template('home.html', 
                             value_loss_sgd=value_loss_sgd, 
                             label_loss_sgd=label_loss_sgd, 
@@ -120,6 +121,13 @@ def testpredict():
     result = pd.concat([original, df_forecast], axis=1)
 
     return result.to_json()
+
+@app.route('/get_corr')
+def get_corr():
+    correlation = dataset.corr()
+
+    return correlation.to_json()
+
 
     
 def sliding_window():

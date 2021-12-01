@@ -58,6 +58,49 @@ var day1 = document.getElementById("day1");
 var day7 = document.getElementById("day7");
 var day30 = document.getElementById("day30");
 
+var heat_data = new Array();
+
+$.ajax({
+    type: "GET",
+    url: "/get_corr",
+    data: JSON.stringify(),
+    contentType: "application/json",
+    dataType: "json",
+    success: function(response) {
+        data = response;
+        
+        Object.values(data).forEach(val => {
+
+            temp = [ 
+                val.open,
+                val.high,
+                val.low,
+                val.close,
+                val.volume,
+                val.marketcap,
+                val.gold_price,
+                val.gtrend
+            ];
+            
+            heat_data.push(temp);
+
+        });
+
+    
+        var heatmap_config = [
+            {
+                z: heat_data,
+                x: ['open', 'high', 'low', 'close','volume', 'marketcap', 'gold_price', 'gtrend'],
+                y: ['open', 'high', 'low', 'close','volume', 'marketcap', 'gold_price', 'gtrend'],
+                type: 'heatmap',
+                hoverongaps: false,
+            }
+            ];
+        // console.log(heatmap_config);
+            Plotly.newPlot('heatMap', heatmap_config);
+    }
+})
+
 
 function predictFuture(length = 1){
     var predict_length = length;
