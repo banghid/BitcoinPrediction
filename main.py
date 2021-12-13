@@ -5,8 +5,10 @@ from pandas.tseries.holiday import USFederalHolidayCalendar
 from pandas.tseries.offsets import CustomBusinessDay
 from keras.models import load_model 
 from sklearn.preprocessing import MinMaxScaler
+from flask_ngrok import run_with_ngrok
 import numpy as np
 app = Flask(__name__)
+run_with_ngrok(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 DIR = 'static/data/'
@@ -24,19 +26,38 @@ dataset = dataset.drop('index', axis = 1)
 scaler = MinMaxScaler().fit(dataset)
 dataset_scaled = scaler.transform(dataset)
 
-
-
 @app.route('/')
 def index():
     
-    loss_adam = pd.read_csv('static/data/loss_history.csv')
-    loss_sgd = pd.read_csv('static/data/loss_history_sgd.csv')
+    loss_adam = pd.read_csv('static/data/loss_ogru/loss_history.csv')
+    loss_adam_h = pd.read_csv('static/data/loss_ogru/loss_history_H.csv')
+    loss_adam_hg = pd.read_csv('static/data/loss_ogru/loss_history_HG.csv')
+    loss_adam_htrend = pd.read_csv('static/data/loss_ogru/loss_history_HTrend.csv')
+    loss_sgd = pd.read_csv('static/data/loss_ogru/loss_history_sgd.csv')
+    loss_sgd_h = pd.read_csv('static/data/loss_ogru/loss_history_sgd_H.csv')
+    loss_sgd_hg = pd.read_csv('static/data/loss_ogru/loss_history_sgd_HG.csv')
+    loss_sgd_htrend = pd.read_csv('static/data/loss_ogru/loss_history_sgd_HTrend.csv')
+    
     label_loss_sgd = loss_sgd['index'].values
     value_loss_sgd = loss_sgd['loss'].values
+    value_val_sgd_h = loss_sgd_h['val_loss'].values
+    value_val_sgd_hg = loss_sgd_hg['val_loss'].values
+    value_val_sgd_htrend = loss_sgd_htrend['val_loss'].values
+    mean_val_sgd = loss_sgd['val_loss'].mean()
+    mean_val_sgd_h = loss_sgd_h['val_loss'].mean()
+    mean_val_sgd_htrend = loss_sgd_htrend['val_loss'].mean()
+    mean_val_sgd_hg = loss_sgd_hg['val_loss'].mean()
     value_val_sgd = loss_sgd['val_loss'].values
     label_loss_adam = loss_adam['index'].values
     value_loss_adam = loss_adam['loss'].values
     value_val_adam = loss_adam['val_loss'].values
+    value_val_adam_h = loss_adam_h['val_loss'].values
+    value_val_adam_hg = loss_adam_hg['val_loss'].values
+    value_val_adam_htrend = loss_adam_htrend['val_loss'].values
+    mean_val = loss_adam['val_loss'].mean()
+    mean_val_h = loss_adam_h['val_loss'].mean()
+    mean_val_htrend = loss_adam_htrend['val_loss'].mean()
+    mean_val_hg = loss_adam_hg['val_loss'].mean()
 
     return render_template('home.html', 
                             value_loss_sgd=value_loss_sgd, 
@@ -44,7 +65,21 @@ def index():
                             label_loss_adam=label_loss_adam, 
                             value_loss_adam=value_loss_adam,
                             value_val_sgd=value_val_sgd,
-                            value_val_adam=value_val_adam
+                            value_val_adam=value_val_adam,
+                            value_val_adam_h=value_val_adam_h,
+                            value_val_adam_hg=value_val_adam_hg,
+                            value_val_adam_htrend=value_val_adam_htrend,
+                            mean_val = mean_val,
+                            mean_val_h=mean_val_h,
+                            mean_val_htrend=mean_val_htrend,
+                            mean_val_hg=mean_val_hg,
+                            value_val_sgd_h=value_val_sgd_h,
+                            value_val_sgd_hg=value_val_sgd_hg,
+                            value_val_sgd_htrend=value_val_sgd_htrend,
+                            mean_val_sgd = mean_val_sgd,
+                            mean_val_sgd_h=mean_val_sgd_h,
+                            mean_val_sgd_htrend=mean_val_sgd_htrend,
+                            mean_val_sgd_hg=mean_val_sgd_hg,
                             )
 
 @app.route('/predict', methods=['POST', 'GET'])
@@ -58,7 +93,7 @@ def predict():
         predict_period_dates = pd.date_range(list(train_dates)[-n_past], periods=n_days_for_prediction, freq=us_bd).tolist()
         print(predict_period_dates)
 
-        model = load_model('static/data/my_model_with_gtrend_gold.h5')
+        model = load_model('static/data/model/my_model_with_gtrend_gold.h5')
 
         trainX, trainY = sliding_window()
 
@@ -96,7 +131,7 @@ def testpredict():
     predict_period_dates = pd.date_range(list(train_dates)[-n_past], periods=n_days_for_prediction, freq=us_bd).tolist()
     print(predict_period_dates)
 
-    model = load_model('static/data/my_model_with_gtrend_gold.h5')
+    model = load_model('static/data/model/my_model_with_gtrend_gold.h5')
 
     trainX, trainY = sliding_window()
     print(trainX.shape)
@@ -127,8 +162,6 @@ def get_corr():
     correlation = dataset.corr()
 
     return correlation.to_json()
-
-
     
 def sliding_window():
     trainX = []
@@ -143,4 +176,5 @@ def sliding_window():
     return np.array(trainX), np.array(trainY)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run()

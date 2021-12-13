@@ -224,25 +224,61 @@
                   labels: [{% for data in label_loss_sgd %}
                           "{{data}}",
                           {% endfor %}],
-                  datasets: [{
-                      label: 'loss',
-                      data: [{% for data in value_loss_sgd %}
-                            "{{data}}",
-                            {% endfor %}],
-                      backgroundColor: [
-                          'rgba(255, 99, 132, 0.2)'
-                      ],
-                      borderColor: [
-                          'rgba(255, 99, 132, 1)'
-                      ],
-                      borderWidth: 1
-                  },{
-                    label: 'validation',
+                  datasets: [
+                    // {
+                    //   label: 'loss',
+                    //   data: [
+                  //       {% for data in value_loss_sgd %}
+                  //           "{{data}}",
+                  //           {% endfor %}],
+                  //     backgroundColor: [
+                  //         'rgba(255, 99, 132, 0.2)'
+                  //     ],
+                  //     borderColor: [
+                  //         'rgba(255, 99, 132, 1)'
+                  //     ],
+                  //     borderWidth: 1
+                  // },
+                  {
+                    label: 'val history, gold and trend',
                     data: [{% for data in value_val_sgd %}
                             "{{data}}",
                             {% endfor %}],
                     backgroundColor: ['rgba(60, 186, 159, 0.2)'],
                     borderColor: ['rgba(60, 186, 159, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history',
+                    data: [{% for data in value_val_sgd_h %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                      'rgba(255, 206, 86, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(255, 206, 86, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history and trend',
+                    data: [{% for data in value_val_sgd_htrend %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history and gold',
+                    data: [{% for data in value_val_sgd_hg %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                    'rgba(153, 102, 255, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(153, 102, 255, 1)'],
                     borderWidth: 1
                   }]
               },
@@ -266,9 +302,9 @@
 
         <div class="section-title">
           <h2>Optimasi</h2>
-          <p>Optimasi yang digunakan adalam <i>Adaptive Moment Estimation</i> (ADAM) yang merupakan salah satu metode <i>Gradient Descent.</i> 
-           Metode ini mengkombinasikan motode RMSprop dan AdaGrad. Berikut grafik <i>loss</i>
-           dari <i>training</i> menggunakan optimasi ADAM</p>
+          <p>Optimasi yang digunakan adalah <i>Adaptive Moment Estimation</i> (ADAM) yang merupakan salah satu metode <i>Gradient Descent.</i> 
+           Metode ini mengkombinasikan motode RMSprop dan AdaGrad. Berikut grafik nilai <i>loss</i> dari <i>testing</i> terhadap model hasil pelatihan
+           dengan kombinasi menggunakan optimasi ADAM</p>
         </div>
 
         <!-- Chart Optimasi -->
@@ -283,20 +319,9 @@
                 labels: [{% for data in label_loss_adam %}
                           "{{data}}",
                           {% endfor %}],
-                  datasets: [{
-                      label: 'loss',
-                      data: [{% for data in value_loss_adam %}
-                            "{{data}}",
-                            {% endfor %}],
-                      backgroundColor: [
-                          'rgba(255, 99, 132, 0.2)'
-                      ],
-                      borderColor: [
-                          'rgba(255, 99, 132, 1)'
-                      ],
-                      borderWidth: 1
-                  },{
-                    label: 'validation',
+                  datasets: [
+                  {
+                    label: 'val full combined',
                     data: [{% for data in value_val_adam %}
                             "{{data}}",
                             {% endfor %}],
@@ -305,6 +330,39 @@
                           
                     ],
                     borderColor: ['rgba(60, 186, 159, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history',
+                    data: [{% for data in value_val_adam_h %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                      'rgba(255, 206, 86, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(255, 206, 86, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history and trend',
+                    data: [{% for data in value_val_adam_htrend %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                  },{
+                    label: 'val history and gold',
+                    data: [{% for data in value_val_adam_hg %}
+                            "{{data}}",
+                            {% endfor %}],
+                    backgroundColor: [
+                    'rgba(153, 102, 255, 0.2)'
+                          
+                    ],
+                    borderColor: ['rgba(153, 102, 255, 1)'],
                     borderWidth: 1
                   }]
               },
@@ -318,6 +376,71 @@
           });
           </script>
         </div>
+
+        <div class="section-title" >
+          <p>
+            Dari grafik diatas dapat terlihat perbandingan nilai <i>loss</i> dari setiap model hasil kombinasi. Namun belum dapat terlihat jelas
+            model yang terbaik. Berikut adalah grafik nilai Rata-Rata <i>loss</i> dari setiap model sehingga dapat disimpulkan model mana yang memiliki
+            <i>learning efficiency</i> terbaik.
+          </p>
+        </div>
+        <div class="col-lg-12">
+          <canvas id="adamChartBar" width="1000" height="400"></canvas>
+          <script>
+            const adamctxbar = document.getElementById('adamChartBar').getContext('2d');
+            const adamChartBar = new Chart(adamctxbar, {
+                type: 'bar',
+                data: {
+                  labels: ['kombinasi keseluruhan', 'history', 'history dan trend', 'history dan gold'],
+                  datasets: [
+                  {
+                    label: 'Rata-Rata Error Sebelum Optimasi',
+                    data: [{{mean_val_sgd}}, {{mean_val_sgd_h}}, {{mean_val_sgd_htrend}}, {{mean_val_sgd_hg}}],
+                    backgroundColor: [
+                        // 'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        // 'rgba(75, 192, 192, 0.2)',
+                        // 'rgba(153, 102, 255, 0.2)'
+                        // 'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        // 'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        // 'rgba(75, 192, 192, 1)',
+                        // 'rgba(153, 102, 255, 1)'
+                        // 'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                  },{
+                    label: 'Rata-Rata Error Setelah Optimasi',
+                    data: [{{mean_val}}, {{mean_val_h}}, {{mean_val_htrend}}, {{mean_val_hg}}],
+                    backgroundColor: [
+                        // 'rgba(54, 162, 235, 0.2)',
+                        // 'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        // 'rgba(153, 102, 255, 0.2)'
+                        // 'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        // 'rgba(54, 162, 235, 1)',
+                        // 'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        // 'rgba(153, 102, 255, 1)'
+                        // 'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            </script>
+          </div>
       </div>
 
       </div>
