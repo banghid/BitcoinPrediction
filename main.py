@@ -85,37 +85,44 @@ def index():
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     if request.method == 'POST':
-        n_past = 7
+        n_past = 30
         n_days_for_prediction = int(request.get_json())
         us_bd = CustomBusinessDay(calendar=USFederalHolidayCalendar())
 
         
         predict_period_dates = pd.date_range(list(train_dates)[-n_past], periods=n_days_for_prediction, freq=us_bd).tolist()
         print(predict_period_dates)
+        # predict_period_dates = list(train_dates[-n_days_for_prediction:])
 
         model = load_model('static/data/model/my_model_with_gtrend_gold.h5')
+        model_sgd = load_model('static/data/model/model_sgd_HGoldTrend.h5')
 
         trainX, trainY = sliding_window()
 
         prediction = model.predict(trainX[-n_days_for_prediction:])
+        prediction_sgd = model_sgd.predict(trainX[-n_days_for_prediction:])
 
         prediction_copies = np.repeat(prediction, dataset_scaled.shape[1], axis=-1)
         y_pred_future = scaler.inverse_transform(prediction_copies)[:,0]
+        prediction_copies_sgd = np.repeat(prediction_sgd, dataset_scaled.shape[1], axis=-1)
+        y_pred_future_sgd = scaler.inverse_transform(prediction_copies_sgd)[:,0]
 
         forecast_dates = []
         for time_i in predict_period_dates:
             forecast_dates.append(time_i.date())
             
-        df_forecast = pd.DataFrame({'Date':np.array(forecast_dates), 'Open':y_pred_future})
+        df_forecast = pd.DataFrame({'ogru_adam':y_pred_future, 'ogru':y_pred_future_sgd})
         df_forecast['Date']=pd.to_datetime(df_forecast['Date'])
 
 
         original = bitcoin_time_series[['date', 'open']]
         original['date']=pd.to_datetime(original['date'])
         original = original.loc[original['date'] >= '2021-8-1']
+        original_data = bitcoin_time_series[['date', 'open']][-n_days_for_prediction:]
+        print(original_data['date'])
 
 
-        result = pd.concat([original, df_forecast], axis=1)
+        result = pd.concat([original_data, df_forecast], axis=1)
 
         return result.to_json()
     else:
