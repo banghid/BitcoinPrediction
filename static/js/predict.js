@@ -262,12 +262,14 @@ function predictFuture(length = 1){
             //     }
             //     counter_index +=1; 
             // })
-            Object.values(data.date).forEach(val => {
+            Object.values(data.predicted_date).forEach(val => {
                 if(val !== null){
                     timestamp = new Date(val);
                     prediksiChart.data.labels.push(timestamp.toDateString());
                 }
             })
+
+            console.log(data.predicted_date)
             
             counter = 0;
             Object.size = function(obj){
@@ -336,8 +338,8 @@ function predictFuture(length = 1){
             });
             prediksiChart.update();
 
-            estimasi_keuntungan_ogru_adam = ogru_adam_data[ogru_adam_data.length - 1] - ogru_adam_data[0];
-            estimasi_keuntungan_ogru = ogru_data[ogru_data.length - 1] - ogru_data[0];
+            estimasi_keuntungan_ogru_adam = ogru_adam_data[length - 1] - ogru_adam_data[0];
+            estimasi_keuntungan_ogru = ogru_data[length - 1] - ogru_data[0];
             keuntungan_original = original_data[original_data.length - 1] - original_data[0];
             location_label = 0;
             estimationChart.data.datasets.forEach((dataset) => {
