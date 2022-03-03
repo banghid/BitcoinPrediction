@@ -14,7 +14,5 @@ Implement [Optimized Gated Recurrent Unit](https://www.researchgate.net/publicat
 
 ![optimation illustration](static/img/optimizing.gif)
 
-Template Name: MyResume
-Template URL: https://bootstrapmade.com/free-html-bootstrap-template-my-resume/
-Author: BootstrapMade.com
-License: https://bootstrapmade.com/license/
+Website Template Name: [MyResume](https://bootstrapmade.com/free-html-bootstrap-template-my-resume/)
+Author & Licences of Website Template: [BootstrapMade.com](https://bootstrapmade.com/license/)
